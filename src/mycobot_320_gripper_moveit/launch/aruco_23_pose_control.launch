@@ -1,0 +1,124 @@
+<launch>
+  <!-- aruco_ros single.launch must publish this frame for marker ID 23. -->
+  <arg name="marker_id" default="23" />
+  <arg name="marker_frame" default="aruco_marker_23" />
+  <arg name="base_frame" default="base" />
+
+  <!-- Same observation pose used by the autonomous GraspNet workflow. -->
+  <arg name="initial_pose_enabled" default="true" />
+  <arg name="initial_x" default="-0.026" />
+  <arg name="initial_y" default="-0.166" />
+  <arg name="initial_z" default="0.308" />
+  <arg name="initial_roll" default="2.851" />
+  <arg name="initial_pitch" default="-0.483" />
+  <arg name="initial_yaw" default="-1.176" />
+  <arg name="open_gripper_value" default="80.0" />
+  <arg name="gripper_open_settle_time" default="2.0" />
+
+  <!-- T_marker_link6: 20 cm along marker +Z and 180 degrees around marker X. -->
+  <arg name="offset_x" default="0.0" />
+  <arg name="offset_y" default="0.0" />
+  <arg name="offset_z" default="0.20" />
+  <arg name="offset_roll" default="3.141592653589793" />
+  <arg name="offset_pitch" default="0.0" />
+  <arg name="offset_yaw" default="0.0" />
+  <arg name="gripper_value" default="-1.0" />
+  <arg name="close_gripper_value" default="0.0" />
+  <arg name="gripper_close_settle_time" default="2.0" />
+  <!-- Retreat toward the base origin within marker-local XY; marker Z stays fixed. -->
+  <arg name="retreat_distance" default="0.08" />
+
+  <!-- Dedicated topics keep this branch isolated from the GraspNet state machine. -->
+  <arg name="command_topic" default="/mycobot320/aruco/target_pose_rpy" />
+  <arg name="motion_status_topic" default="/mycobot320/aruco/motion_status" />
+  <arg name="control_status_topic" default="/mycobot320/aruco_control_status" />
+  <arg name="target_pose_topic" default="/mycobot320/aruco_target_pose" />
+  <arg name="joint_state_topic" default="/mycobot320/aruco/planned_joint_states" />
+  <arg name="actual_joint_state_topic" default="/joint_states" />
+
+  <arg name="port" default="/dev/ttyACM0" />
+  <arg name="baud" default="115200" />
+  <arg name="speed" default="50" />
+  <arg name="gripper_speed" default="50" />
+  <arg name="initial_gripper_value" default="100" />
+  <arg name="time_scale" default="2.0" />
+  <arg name="joint_state_rate" default="5.0" />
+  <arg name="execute" default="true" />
+  <arg name="sync_plan" default="true" />
+  <arg name="use_rviz" default="true" />
+  <arg name="arm_goal_tolerance" default="0.220" />
+  <arg name="motion_timeout" default="60.0" />
+  <arg name="startup_timeout" default="60.0" />
+  <arg name="tf_wait_timeout" default="30.0" />
+  <arg name="max_tf_age" default="1.0" />
+  <arg name="stable_samples" default="5" />
+  <arg name="sample_interval" default="0.10" />
+  <arg name="max_position_jitter" default="0.008" />
+  <arg name="max_orientation_jitter" default="0.10" />
+
+  <include file="$(find mycobot_320_gripper_moveit)/launch/plan_to_pose_joint_state.launch">
+    <arg name="execute" value="$(arg execute)" />
+    <arg name="sync_plan" value="$(arg sync_plan)" />
+    <arg name="command_mode" value="topic" />
+    <arg name="command_topic" value="$(arg command_topic)" />
+    <arg name="motion_status_topic" value="$(arg motion_status_topic)" />
+    <arg name="joint_state_topic" value="$(arg joint_state_topic)" />
+    <arg name="actual_joint_state_topic" value="$(arg actual_joint_state_topic)" />
+    <arg name="reference_frame" value="$(arg base_frame)" />
+    <arg name="end_effector_link" value="link6" />
+    <arg name="port" value="$(arg port)" />
+    <arg name="baud" value="$(arg baud)" />
+    <arg name="speed" value="$(arg speed)" />
+    <arg name="gripper_speed" value="$(arg gripper_speed)" />
+    <arg name="time_scale" value="$(arg time_scale)" />
+    <arg name="joint_state_rate" value="$(arg joint_state_rate)" />
+    <arg name="gripper_control_enabled" value="true" />
+    <arg name="gripper_feedback_enabled" value="false" />
+    <arg name="initial_gripper_value" value="$(arg initial_gripper_value)" />
+    <arg name="reached_timeout" value="$(arg motion_timeout)" />
+    <arg name="arm_goal_tolerance" value="$(arg arm_goal_tolerance)" />
+    <arg name="use_rviz" value="$(arg use_rviz)" />
+  </include>
+
+  <node name="aruco_pose_control"
+        pkg="mycobot_320_gripper_moveit"
+        type="aruco_pose_control.py"
+        output="screen">
+    <param name="marker_id" type="int" value="$(arg marker_id)" />
+    <param name="marker_frame" type="string" value="$(arg marker_frame)" />
+    <param name="base_frame" type="string" value="$(arg base_frame)" />
+    <param name="initial_pose_enabled" type="bool" value="$(arg initial_pose_enabled)" />
+    <param name="initial_x" type="double" value="$(arg initial_x)" />
+    <param name="initial_y" type="double" value="$(arg initial_y)" />
+    <param name="initial_z" type="double" value="$(arg initial_z)" />
+    <param name="initial_roll" type="double" value="$(arg initial_roll)" />
+    <param name="initial_pitch" type="double" value="$(arg initial_pitch)" />
+    <param name="initial_yaw" type="double" value="$(arg initial_yaw)" />
+    <param name="open_gripper_value" type="double" value="$(arg open_gripper_value)" />
+    <param name="gripper_open_settle_time" type="double" value="$(arg gripper_open_settle_time)" />
+    <param name="offset_x" type="double" value="$(arg offset_x)" />
+    <param name="offset_y" type="double" value="$(arg offset_y)" />
+    <param name="offset_z" type="double" value="$(arg offset_z)" />
+    <param name="offset_roll" type="double" value="$(arg offset_roll)" />
+    <param name="offset_pitch" type="double" value="$(arg offset_pitch)" />
+    <param name="offset_yaw" type="double" value="$(arg offset_yaw)" />
+    <param name="gripper_value" type="double" value="$(arg gripper_value)" />
+    <param name="close_gripper_value" type="double" value="$(arg close_gripper_value)" />
+    <param name="gripper_close_settle_time" type="double" value="$(arg gripper_close_settle_time)" />
+    <param name="retreat_distance" type="double" value="$(arg retreat_distance)" />
+    <param name="command_topic" type="string" value="$(arg command_topic)" />
+    <param name="motion_status_topic" type="string" value="$(arg motion_status_topic)" />
+    <param name="control_status_topic" type="string" value="$(arg control_status_topic)" />
+    <param name="target_pose_topic" type="string" value="$(arg target_pose_topic)" />
+    <param name="arm_goal_tolerance" type="double" value="$(arg arm_goal_tolerance)" />
+    <param name="motion_timeout" type="double" value="$(arg motion_timeout)" />
+    <param name="startup_timeout" type="double" value="$(arg startup_timeout)" />
+    <param name="tf_wait_timeout" type="double" value="$(arg tf_wait_timeout)" />
+    <param name="max_tf_age" type="double" value="$(arg max_tf_age)" />
+    <param name="stable_samples" type="int" value="$(arg stable_samples)" />
+    <param name="sample_interval" type="double" value="$(arg sample_interval)" />
+    <param name="max_position_jitter" type="double" value="$(arg max_position_jitter)" />
+    <param name="max_orientation_jitter" type="double" value="$(arg max_orientation_jitter)" />
+    <param name="expect_execution" type="bool" value="$(arg execute)" />
+  </node>
+</launch>

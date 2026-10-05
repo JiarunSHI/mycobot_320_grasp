@@ -1,0 +1,144 @@
+<launch>
+  <!-- Observation pose is required because it is robot/workcell specific. -->
+  <arg name="observe_x" />
+  <arg name="observe_y" />
+  <arg name="observe_z" />
+  <arg name="observe_roll" />
+  <arg name="observe_pitch" />
+  <arg name="observe_yaw" />
+  <arg name="observe_gripper" default="100" />
+  <arg name="release_x" />
+  <arg name="release_y" />
+  <arg name="release_z" />
+  <arg name="release_roll" />
+  <arg name="release_pitch" />
+  <arg name="release_yaw" />
+  <arg name="release_gripper" default="100" />
+
+  <!-- Use target_id for one COCO class, or target_ids:="[39, 41]" for priority order. -->
+  <arg name="target_id" default="-1" />
+  <arg name="target_ids" default="[]" />
+  <arg name="base_frame" default="base" />
+  <arg name="yolo_3d_result_topic" default="/yolo_3d_result" />
+  <arg name="grasp_candidates_topic" default="/grasp_ros/grasp_candidates" />
+  <arg name="grasp_frame_prefix" default="grasp_ros_link6_target" />
+  <!-- grasp_gripper_value is kept as a legacy alias; prefer post_reach_gripper_value. -->
+  <arg name="grasp_gripper_value" default="0.0" />
+  <arg name="approach_gripper_value" default="100.0" />
+  <arg name="post_reach_gripper_value" default="0.0" />
+  <arg name="grasp_offset_frame" default="target" />
+  <arg name="grasp_offset_x" default="0.0" />
+  <arg name="grasp_offset_y" default="0.0" />
+  <arg name="grasp_offset_z" default="0.0" />
+  <arg name="grasp_offset_roll" default="0.0" />
+  <arg name="grasp_offset_pitch" default="0.0" />
+  <arg name="grasp_offset_yaw" default="0.0" />
+  <arg name="max_grasp_cycles" default="0" />
+  <arg name="retry_delay" default="0.5" />
+  <arg name="observe_link" default="link6" />
+  <arg name="observe_position_tolerance" default="0.08" />
+  <arg name="observe_orientation_tolerance" default="0.60" />
+  <arg name="target_max_age" default="2.0" />
+  <arg name="scan_rate" default="2.0" />
+  <arg name="detection_timeout" default="0.0" />
+  <arg name="grasp_timeout" default="60.0" />
+
+  <arg name="command_topic" default="/mycobot320/target_pose_rpy" />
+  <arg name="motion_status_topic" default="/mycobot320/motion_status" />
+  <arg name="task_status_topic" default="/mycobot320/task_status" />
+  <arg name="selected_frame_topic" default="/mycobot320/selected_grasp_frame" />
+  <arg name="selected_transform_topic" default="/mycobot320/selected_grasp_transform" />
+  <arg name="joint_state_topic" default="planned_joint_states" />
+  <arg name="actual_joint_state_topic" default="/joint_states" />
+
+  <arg name="port" default="/dev/ttyACM0" />
+  <arg name="baud" default="115200" />
+  <arg name="speed" default="50" />
+  <arg name="gripper_speed" default="50" />
+  <arg name="time_scale" default="2.0" />
+  <arg name="joint_state_rate" default="5.0" />
+  <arg name="gripper_state_rate" default="2.0" />
+  <arg name="gripper_control_enabled" default="true" />
+  <arg name="gripper_feedback_enabled" default="false" />
+  <arg name="initial_gripper_value" default="100" />
+  <arg name="motion_timeout" default="60.0" />
+  <arg name="arm_goal_tolerance" default="0.220" />
+  <arg name="release_arm_goal_tolerance" default="0.250" />
+  <arg name="gripper_goal_tolerance" default="0.200" />
+  <arg name="use_rviz" default="true" />
+
+  <include file="$(find mycobot_320_gripper_moveit)/launch/plan_to_pose_joint_state.launch">
+    <arg name="execute" value="true" />
+    <arg name="sync_plan" value="true" />
+    <arg name="command_mode" value="topic" />
+    <arg name="command_topic" value="$(arg command_topic)" />
+    <arg name="motion_status_topic" value="$(arg motion_status_topic)" />
+    <arg name="joint_state_topic" value="$(arg joint_state_topic)" />
+    <arg name="actual_joint_state_topic" value="$(arg actual_joint_state_topic)" />
+    <arg name="reference_frame" value="$(arg base_frame)" />
+    <arg name="end_effector_link" value="link6" />
+    <arg name="port" value="$(arg port)" />
+    <arg name="baud" value="$(arg baud)" />
+    <arg name="speed" value="$(arg speed)" />
+    <arg name="gripper_speed" value="$(arg gripper_speed)" />
+    <arg name="time_scale" value="$(arg time_scale)" />
+    <arg name="joint_state_rate" value="$(arg joint_state_rate)" />
+    <arg name="gripper_state_rate" value="$(arg gripper_state_rate)" />
+    <arg name="gripper_control_enabled" value="$(arg gripper_control_enabled)" />
+    <arg name="gripper_feedback_enabled" value="$(arg gripper_feedback_enabled)" />
+    <arg name="initial_gripper_value" value="$(arg initial_gripper_value)" />
+    <arg name="reached_timeout" value="$(arg motion_timeout)" />
+    <arg name="arm_goal_tolerance" value="$(arg arm_goal_tolerance)" />
+    <arg name="gripper_goal_tolerance" value="$(arg gripper_goal_tolerance)" />
+    <arg name="use_rviz" value="$(arg use_rviz)" />
+  </include>
+
+  <node name="observe_and_query_object"
+        pkg="mycobot_320_gripper_moveit"
+        type="observe_and_query_object.py"
+        output="screen">
+    <param name="command_topic" type="string" value="$(arg command_topic)" />
+    <param name="motion_status_topic" type="string" value="$(arg motion_status_topic)" />
+    <param name="task_status_topic" type="string" value="$(arg task_status_topic)" />
+    <param name="selected_frame_topic" type="string" value="$(arg selected_frame_topic)" />
+    <param name="selected_transform_topic" type="string" value="$(arg selected_transform_topic)" />
+    <param name="yolo_3d_result_topic" type="string" value="$(arg yolo_3d_result_topic)" />
+    <param name="grasp_candidates_topic" type="string" value="$(arg grasp_candidates_topic)" />
+    <param name="base_frame" type="string" value="$(arg base_frame)" />
+    <param name="grasp_frame_prefix" type="string" value="$(arg grasp_frame_prefix)" />
+    <param name="grasp_gripper_value" type="double" value="$(arg grasp_gripper_value)" />
+    <param name="approach_gripper_value" type="double" value="$(arg approach_gripper_value)" />
+    <param name="post_reach_gripper_value" type="double" value="$(arg post_reach_gripper_value)" />
+    <param name="grasp_offset_frame" type="string" value="$(arg grasp_offset_frame)" />
+    <param name="grasp_offset_x" type="double" value="$(arg grasp_offset_x)" />
+    <param name="grasp_offset_y" type="double" value="$(arg grasp_offset_y)" />
+    <param name="grasp_offset_z" type="double" value="$(arg grasp_offset_z)" />
+    <param name="grasp_offset_roll" type="double" value="$(arg grasp_offset_roll)" />
+    <param name="grasp_offset_pitch" type="double" value="$(arg grasp_offset_pitch)" />
+    <param name="grasp_offset_yaw" type="double" value="$(arg grasp_offset_yaw)" />
+    <param name="release_gripper_value" type="double" value="$(arg release_gripper)" />
+    <param name="max_grasp_cycles" type="int" value="$(arg max_grasp_cycles)" />
+    <param name="retry_delay" type="double" value="$(arg retry_delay)" />
+    <param name="observe_link" type="string" value="$(arg observe_link)" />
+    <param name="observe_position_tolerance" type="double" value="$(arg observe_position_tolerance)" />
+    <param name="observe_orientation_tolerance" type="double" value="$(arg observe_orientation_tolerance)" />
+    <param name="target_max_age" type="double" value="$(arg target_max_age)" />
+    <param name="scan_rate" type="double" value="$(arg scan_rate)" />
+    <param name="detection_timeout" type="double" value="$(arg detection_timeout)" />
+    <param name="grasp_timeout" type="double" value="$(arg grasp_timeout)" />
+    <param name="motion_timeout" type="double" value="$(arg motion_timeout)" />
+    <param name="release_arm_goal_tolerance" type="double" value="$(arg release_arm_goal_tolerance)" />
+    <rosparam param="observe_pose" subst_value="true">
+      [$(arg observe_x), $(arg observe_y), $(arg observe_z),
+       $(arg observe_roll), $(arg observe_pitch), $(arg observe_yaw),
+       $(arg observe_gripper)]
+    </rosparam>
+    <rosparam param="release_pose" subst_value="true">
+      [$(arg release_x), $(arg release_y), $(arg release_z),
+       $(arg release_roll), $(arg release_pitch), $(arg release_yaw),
+       $(arg release_gripper)]
+    </rosparam>
+    <param name="target_id" type="int" value="$(arg target_id)" />
+    <rosparam param="target_ids" subst_value="true">$(arg target_ids)</rosparam>
+  </node>
+</launch>

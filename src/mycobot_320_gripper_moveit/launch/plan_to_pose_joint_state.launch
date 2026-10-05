@@ -1,0 +1,99 @@
+<launch>
+  <arg name="x" default="0.20" />
+  <arg name="y" default="0.00" />
+  <arg name="z" default="0.20" />
+  <arg name="roll" default="0.0" />
+  <arg name="pitch" default="0.0" />
+  <arg name="yaw" default="0.0" />
+
+  <arg name="execute" default="false" />
+  <arg name="sync_plan" default="false" />
+  <arg name="command_mode" default="topic" />
+  <arg name="command_topic" default="/mycobot320/target_pose_rpy" />
+  <arg name="motion_status_topic" default="/mycobot320/motion_status" />
+  <arg name="joint_state_topic" default="planned_joint_states" />
+  <arg name="actual_joint_state_topic" default="/joint_states" />
+  <arg name="group" default="arm_group" />
+  <arg name="gripper_group" default="gripper_group" />
+  <arg name="gripper_joint" default="gripper_controller" />
+  <arg name="gripper_control_enabled" default="false" />
+  <arg name="gripper_value" default="-1.0" />
+  <arg name="gripper_angle" default="-1.0" />
+  <arg name="reference_frame" default="base" />
+  <arg name="end_effector_link" default="link6" />
+  <arg name="time_scale" default="1.0" />
+  <arg name="start_delay" default="0.0" />
+  <arg name="move_group_wait" default="30.0" />
+  <arg name="wait_for_subscriber" default="true" />
+  <arg name="subscriber_timeout" default="30.0" />
+  <arg name="command_queue_size" default="20" />
+  <arg name="verify_reached" default="true" />
+  <arg name="actual_state_timeout" default="15.0" />
+  <arg name="reached_timeout" default="20.0" />
+  <arg name="arm_goal_tolerance" default="0.220" />
+  <arg name="gripper_goal_tolerance" default="0.200" />
+  <arg name="reached_stable_samples" default="3" />
+
+  <arg name="port" default="/dev/ttyACM0" />
+  <arg name="baud" default="115200" />
+  <arg name="speed" default="80" />
+  <arg name="gripper_speed" default="100" />
+  <arg name="joint_state_rate" default="5.0" />
+  <arg name="gripper_state_rate" default="2.0" />
+  <arg name="gripper_feedback_enabled" default="false" />
+  <arg name="initial_gripper_value" default="100" />
+  <arg name="serial_command_queue_size" default="100" />
+  <arg name="use_rviz" default="true" />
+
+  <include file="$(find mycobot_320_gripper_moveit)/launch/mycobot320_gripper_moveit.launch">
+    <arg name="sync_plan" value="$(arg sync_plan)" />
+    <arg name="sync_joint_state_topic" value="$(arg joint_state_topic)" />
+    <arg name="port" value="$(arg port)" />
+    <arg name="baud" value="$(arg baud)" />
+    <arg name="speed" value="$(arg speed)" />
+    <arg name="gripper_speed" value="$(arg gripper_speed)" />
+    <arg name="feedback_joint_state_topic" value="$(arg actual_joint_state_topic)" />
+    <arg name="joint_state_rate" value="$(arg joint_state_rate)" />
+    <arg name="gripper_state_rate" value="$(arg gripper_state_rate)" />
+    <arg name="gripper_control_enabled" value="$(arg gripper_control_enabled)" />
+    <arg name="gripper_feedback_enabled" value="$(arg gripper_feedback_enabled)" />
+    <arg name="initial_gripper_value" value="$(arg initial_gripper_value)" />
+    <arg name="serial_command_queue_size" value="$(arg serial_command_queue_size)" />
+    <arg name="use_rviz" value="$(arg use_rviz)" />
+  </include>
+
+  <node name="plan_to_pose_joint_state" pkg="mycobot_320_gripper_moveit" type="plan_to_pose_joint_state.py" output="screen">
+    <param name="x" type="double" value="$(arg x)" />
+    <param name="y" type="double" value="$(arg y)" />
+    <param name="z" type="double" value="$(arg z)" />
+    <param name="roll" type="double" value="$(arg roll)" />
+    <param name="pitch" type="double" value="$(arg pitch)" />
+    <param name="yaw" type="double" value="$(arg yaw)" />
+    <param name="execute" type="bool" value="$(arg execute)" />
+    <param name="command_mode" type="string" value="$(arg command_mode)" />
+    <param name="command_topic" type="string" value="$(arg command_topic)" />
+    <param name="status_topic" type="string" value="$(arg motion_status_topic)" />
+    <param name="joint_state_topic" type="string" value="$(arg joint_state_topic)" />
+    <param name="actual_joint_state_topic" type="string" value="$(arg actual_joint_state_topic)" />
+    <param name="group" type="string" value="$(arg group)" />
+    <param name="gripper_group" type="string" value="$(arg gripper_group)" />
+    <param name="gripper_joint" type="string" value="$(arg gripper_joint)" />
+    <param name="gripper_control_enabled" type="bool" value="$(arg gripper_control_enabled)" />
+    <param name="gripper_value" type="double" value="$(arg gripper_value)" />
+    <param name="gripper_angle" type="double" value="$(arg gripper_angle)" />
+    <param name="reference_frame" type="string" value="$(arg reference_frame)" />
+    <param name="end_effector_link" type="string" value="$(arg end_effector_link)" />
+    <param name="time_scale" type="double" value="$(arg time_scale)" />
+    <param name="start_delay" type="double" value="$(arg start_delay)" />
+    <param name="move_group_wait" type="double" value="$(arg move_group_wait)" />
+    <param name="wait_for_subscriber" type="bool" value="$(arg wait_for_subscriber)" />
+    <param name="subscriber_timeout" type="double" value="$(arg subscriber_timeout)" />
+    <param name="command_queue_size" type="int" value="$(arg command_queue_size)" />
+    <param name="verify_reached" type="bool" value="$(arg verify_reached)" />
+    <param name="actual_state_timeout" type="double" value="$(arg actual_state_timeout)" />
+    <param name="reached_timeout" type="double" value="$(arg reached_timeout)" />
+    <param name="arm_goal_tolerance" type="double" value="$(arg arm_goal_tolerance)" />
+    <param name="gripper_goal_tolerance" type="double" value="$(arg gripper_goal_tolerance)" />
+    <param name="reached_stable_samples" type="int" value="$(arg reached_stable_samples)" />
+  </node>
+</launch>
